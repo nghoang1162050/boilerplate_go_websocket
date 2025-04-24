@@ -9,6 +9,7 @@ CREATE TABLE `rooms` (
     `name` VARCHAR(255) NOT NULL,
     `description` TEXT,
     `host_id` CHAR(36) COLLATE utf8mb4_unicode_ci NOT NULL,
+    `is_closed` BIT DEFAULT 0
     `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT `room_user` FOREIGN KEY (`host_id`) REFERENCES `users`(`id`)
 );

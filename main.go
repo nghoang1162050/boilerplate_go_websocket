@@ -2,6 +2,7 @@ package main
 
 import (
 	"boilerplate_go_websocket/internal/controller"
+	"boilerplate_go_websocket/internal/core"
 	"boilerplate_go_websocket/internal/database"
 	"boilerplate_go_websocket/internal/gorm_gen"
 	"boilerplate_go_websocket/internal/middleware"
@@ -36,6 +37,13 @@ func main() {
 	authUseCase := usecase.NewAuthUseCase(query)
 	authController := controller.NewAuthController(authUseCase)
 
+	// room repository, usecase, and controller
+	roomUseCase := usecase.NewRoomUseCase(query)
+	roomController := controller.NewRoomController(roomUseCase)
+
+	// Initialize the HubManager
+	hubManager := core.NewHubManager()
+
 	// echo app instance
 	e := echo.New()
 	e.Use(echoMiddleWare.LoggerWithConfig(echoMiddleWare.LoggerConfig{
@@ -53,10 +61,19 @@ func main() {
 	e.Use(middleware.JWTMiddleware())
 	
 	router.NewAuthRouter(apiGroup, authController)
+	router.NewRoomRouter(apiGroup, roomController)
+
+	// apiGroup.GET("/ws", func(c echo.Context) error {
+    //     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
+    //     if err != nil {
+    //         return err
+    //     }
+    //     go handleWebSocket(conn)
+    //     return nil
+    // })
 
 	log.Fatal(e.Start(":8080"))
 
-	// hubManager := core.NewHubManager()
 	// hubManager.InitHub("default")
 	// hubManager.InitHub("secondary")
 
@@ -74,18 +91,4 @@ func main() {
 	// 	upgrader := core.DefaultUpgrader()
 	// 	core.ServeWs(hub, w, r, upgrader)
 	// })
-
-	// http.HandleFunc("/close", func(w http.ResponseWriter, r *http.Request) {
-	// 	hubID := r.URL.Query().Get("hubId")
-	// 	if hubID == "" {
-	// 		http.Error(w, "hub id required", http.StatusBadRequest)
-    //         return
-	// 	}
-
-	// 	hubManager.CloseHub(hubID)
-	// 	w.Write([]byte("Hub closed"))
-	// })
-
-	// log.Println("Server started on :8080")
-	// http.ListenAndServe(":8080", nil)
 }

@@ -12,8 +12,6 @@ type AuthUseCase interface {
 }
 
 type authUseCase struct {
-	// repo repository.BaseRepository[model.User]
-	// userRepo repository.UserRepository
 	query *gorm_gen.Query
 }
 
