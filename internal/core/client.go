@@ -1,4 +1,4 @@
-package dto
+package core
 
 import (
 	"boilerplate_go_websocket/internal/constants"
