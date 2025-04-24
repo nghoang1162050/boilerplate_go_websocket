@@ -31,17 +31,36 @@ func (c *Client) ReadPump() {
 		return nil
 	})
 
+	msgChan := make(chan []byte)
+	errChan := make(chan error, 1)
+
+	go func() {
+		defer close(msgChan)
+		for {
+			_, message, err := c.Connection.ReadMessage()
+			if err != nil {
+				errChan <- err
+				return
+			}
+			message = bytes.TrimSpace(bytes.Replace(message, constants.Newline, constants.Space, -1))
+            msgChan <- message
+		}
+	}()
+
 	for {
-		_, message, err := c.Connection.ReadMessage()
-		if err != nil {
+		select {
+		case msg, ok := <-msgChan:
+			if !ok {
+				return
+			}
+			c.Hub.Broadcast <- msg
+
+		case err := <-errChan:
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("error: %v", err)
 			}
-			break
+			return
 		}
-
-		message = bytes.TrimSpace(bytes.Replace(message, constants.Newline, constants.Space, -1))
-		c.Hub.Broadcast <- message
 	}
 }
 

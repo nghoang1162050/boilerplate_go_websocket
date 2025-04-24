@@ -44,6 +44,10 @@ func main() {
 	// Initialize the HubManager
 	hubManager := core.NewHubManager()
 
+	// chat repository, usecase, and controller
+	chatUseCase := usecase.NewChatUseCase(hubManager, query)
+	chatController := controller.NewChatController(chatUseCase)
+
 	// echo app instance
 	e := echo.New()
 	e.Use(echoMiddleWare.LoggerWithConfig(echoMiddleWare.LoggerConfig{
@@ -62,16 +66,8 @@ func main() {
 	
 	router.NewAuthRouter(apiGroup, authController)
 	router.NewRoomRouter(apiGroup, roomController)
-
-	// apiGroup.GET("/ws", func(c echo.Context) error {
-    //     conn, err := upgrader.Upgrade(c.Response(), c.Request(), nil)
-    //     if err != nil {
-    //         return err
-    //     }
-    //     go handleWebSocket(conn)
-    //     return nil
-    // })
-
+	router.NewChatRouter(apiGroup, chatController)
+	
 	log.Fatal(e.Start(":8080"))
 
 	// hubManager.InitHub("default")
