@@ -1,11 +1,16 @@
 package main
 
 import (
+	"boilerplate_go_websocket/internal/controller"
 	"boilerplate_go_websocket/internal/database"
+	"boilerplate_go_websocket/internal/gorm_gen"
 	"boilerplate_go_websocket/internal/middleware"
+	"boilerplate_go_websocket/internal/router"
+	"boilerplate_go_websocket/internal/usecase"
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/labstack/echo-contrib/prometheus"
 	"github.com/labstack/echo/v4"
 	echoMiddleWare "github.com/labstack/echo/v4/middleware"
 	log "github.com/sirupsen/logrus"
@@ -21,10 +26,15 @@ func main() {
     }
 
 	// Initialize database connection
-	_, err := database.InitDbClient()
+	db, err := database.InitDbClient()
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
+	query := gorm_gen.Use(db)
+
+	// auth repository, usecase, and controller
+	authUseCase := usecase.NewAuthUseCase(query)
+	authController := controller.NewAuthController(authUseCase)
 
 	// echo app instance
 	e := echo.New()
@@ -33,8 +43,16 @@ func main() {
 		Output: os.Stdout,
 	}))
 
+	// Prometheus middleware
+    p := prometheus.NewPrometheus("echo", nil)
+    p.Use(e)
+
+	apiGroup := e.Group("/api")
+
 	// Authentication middleware
 	e.Use(middleware.JWTMiddleware())
+	
+	router.NewAuthRouter(apiGroup, authController)
 
 	log.Fatal(e.Start(":8080"))
 

@@ -16,49 +16,34 @@ import (
 )
 
 var (
-	Q          = new(Query)
-	Message    *message
-	Room       *room
-	RoomMember *roomMember
-	User       *user
+	Q    = new(Query)
+	User *user
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
-	Message = &Q.Message
-	Room = &Q.Room
-	RoomMember = &Q.RoomMember
 	User = &Q.User
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
-		db:         db,
-		Message:    newMessage(db, opts...),
-		Room:       newRoom(db, opts...),
-		RoomMember: newRoomMember(db, opts...),
-		User:       newUser(db, opts...),
+		db:   db,
+		User: newUser(db, opts...),
 	}
 }
 
 type Query struct {
 	db *gorm.DB
 
-	Message    message
-	Room       room
-	RoomMember roomMember
-	User       user
+	User user
 }
 
 func (q *Query) Available() bool { return q.db != nil }
 
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
-		db:         db,
-		Message:    q.Message.clone(db),
-		Room:       q.Room.clone(db),
-		RoomMember: q.RoomMember.clone(db),
-		User:       q.User.clone(db),
+		db:   db,
+		User: q.User.clone(db),
 	}
 }
 
@@ -72,27 +57,18 @@ func (q *Query) WriteDB() *Query {
 
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
-		db:         db,
-		Message:    q.Message.replaceDB(db),
-		Room:       q.Room.replaceDB(db),
-		RoomMember: q.RoomMember.replaceDB(db),
-		User:       q.User.replaceDB(db),
+		db:   db,
+		User: q.User.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
-	Message    IMessageDo
-	Room       IRoomDo
-	RoomMember IRoomMemberDo
-	User       IUserDo
+	User IUserDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
-		Message:    q.Message.WithContext(ctx),
-		Room:       q.Room.WithContext(ctx),
-		RoomMember: q.RoomMember.WithContext(ctx),
-		User:       q.User.WithContext(ctx),
+		User: q.User.WithContext(ctx),
 	}
 }
 

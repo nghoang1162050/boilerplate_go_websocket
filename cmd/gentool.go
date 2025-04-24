@@ -5,7 +5,6 @@ import (
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gen"
-	"gorm.io/gen/field"
 	"gorm.io/gorm"
 )
 
@@ -27,49 +26,51 @@ func GenModels() {
 	users := g.GenerateModel("users")
 
 	// Define the relationship between rooms and users
-	room_options := field.RelateConfig{
-		GORMTag: field.GormTag{
-			"foreignKey": []string{"room_user"},
-			"references": []string{"id"},
-		},
-	}
-	rooms := g.GenerateModel("rooms", gen.FieldRelate(field.HasOne, "Host", users, &room_options))
+	// room_options := field.RelateConfig{
+	// 	GORMTag: field.GormTag{
+	// 		"foreignKey": []string{"room_user"},
+	// 		"references": []string{"host_id"},
+	// 	},
+	// }
+	// rooms := g.GenerateModel("rooms", gen.FieldRelate(field.HasOne, "Host", users, &room_options))
 
-	// Define the relationship between rooms and users, room details.
-	room_members_user_options := field.RelateConfig{
-		GORMTag: field.GormTag{
-			"foreignKey": []string{"room_members_user"},
-			"references": []string{"id"},
-		},
-	}
-	room_members_room_options := field.RelateConfig{
-		GORMTag: field.GormTag{
-			"foreignKey": []string{"room_members_room"},
-			"references": []string{"id"},
-		},
-	}
-	room_members := g.GenerateModel("room_members", 
-		gen.FieldRelate(field.HasMany, "RoomMembers", users, &room_members_user_options),
-		gen.FieldRelate(field.HasMany, "Room", users, &room_members_room_options))
+	// // Define the relationship between rooms and users, room details.
+	// room_members_user_options := field.RelateConfig{
+	// 	GORMTag: field.GormTag{
+	// 		"foreignKey": []string{"room_members_user"},
+	// 		"references": []string{"user_id"},
+	// 	},
+	// }
+	// room_members_room_options := field.RelateConfig{
+	// 	GORMTag: field.GormTag{
+	// 		"foreignKey": []string{"room_members_room"},
+	// 		"references": []string{"room_id"},
+	// 	},
+	// }
+	// room_members := g.GenerateModel("room_members", 
+	// 	gen.FieldRelate(field.HasOne, "RoomMembers", users, &room_members_user_options),
+	// 	gen.FieldRelate(field.HasOne, "Room", rooms, &room_members_room_options))
 
-	// Define the relationship between messages and users, room details.
-	messages_room_options := field.RelateConfig{
-		GORMTag: field.GormTag{
-			"foreignKey": []string{"messages_room"},
-			"references": []string{"id"},
-		},
-	}
-	messages_user_options := field.RelateConfig{
-		GORMTag: field.GormTag{
-			"foreignKey": []string{"messages_user"},
-			"references": []string{"id"},
-		},
-	}
-	messages := g.GenerateModel("messages",
-		gen.FieldRelate(field.HasOne, "Room", users, &messages_room_options),
-		gen.FieldRelate(field.HasOne, "User", users, &messages_user_options))
+	// // Define the relationship between messages and users, room details.
+	// messages_room_options := field.RelateConfig{
+	// 	GORMTag: field.GormTag{
+	// 		"foreignKey": []string{"messages_room"},
+	// 		"references": []string{"room_id"},
+	// 	},
+	// }
+	// messages_user_options := field.RelateConfig{
+	// 	GORMTag: field.GormTag{
+	// 		"foreignKey": []string{"messages_user"},
+	// 		"references": []string{"sender_id"},
+	// 	},
+	// }
+	// messages := g.GenerateModel("messages",
+	// 	gen.FieldRelate(field.BelongsTo, "Room", rooms, &messages_room_options),
+	// 	gen.FieldRelate(field.HasOne, "User", users, &messages_user_options))
 
-	g.ApplyBasic(users, rooms, messages, room_members)
+	// g.ApplyBasic(users, rooms, messages, room_members)
+
+	g.ApplyBasic(users)
 
 	g.Execute()
 }
